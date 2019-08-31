@@ -204,7 +204,8 @@ def unconf_update(taker, schedulefile, tumble_log, addtolog=False):
         tumble_log.info("Completed successfully this entry:")
         #the log output depends on if it's to INTERNAL
         hrdestn = None
-        if taker.schedule[taker.schedule_index][3] in ["INTERNAL", "addrask"]:
+        if taker.schedule[taker.schedule_index][3] in ["INTERNAL",
+                "INTERNAL-SAME-MIXDEPTH", "addrask"]:
             hrdestn = taker.my_cj_addr
         #Whether sweep or not, the amt is not in satoshis; use taker data
         hramt = taker.cjamount

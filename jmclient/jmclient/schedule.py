@@ -46,7 +46,7 @@ def get_schedule(filename):
                     completed = int(completed)
             except ValueError as e:
                 return (False, "Failed to parse schedule line: " + sl)
-            if destaddr not in ["INTERNAL", "addrask"]:
+            if destaddr not in ["INTERNAL", "addrask", "INTERNAL-SAME-MIXDEPTH"]:
                 success, errmsg = validate_address(destaddr)
                 if not success:
                     return (False, "Invalid address: " + destaddr + "," + errmsg)
@@ -84,7 +84,6 @@ def get_tumble_schedule(options, destaddrs):
     This is because we now use a general "schedule" syntax for both tumbler and
     any other taker algo; it interprets floats as fractions and integers as satoshis,
     and zero as sweep (as before).
-    This is a modified version of tumbler.py/generate_tumbler_tx()
     """
     #if options['mixdepthsrc'] != 0:
     #    raise NotImplementedError("Non-zero mixdepth source not supported; "
@@ -97,6 +96,23 @@ def get_tumble_schedule(options, destaddrs):
                                options['txcountparams'][1], options['mixdepthcount'])
     txcounts = lower_bounded_int(txcounts, options['mintxcount'])
     tx_list = []
+    ### stage 1 coinjoins, which sweep the entire mixdepth without creating change
+    waits = rand_exp_array(options['timelambda']*options['stage1-timelambda-increase'],
+                           options['mixdepthcount'])
+    makercounts = rand_norm_array(options['makercountrange'][0],
+                                  options['makercountrange'][1],
+                                  options['mixdepthcount'])
+    makercounts = lower_bounded_int(makercounts, options['minmakercount'])
+    for m, (wait, makercount) in enumerate(zip(waits, makercounts)):
+        tx = {'amount_fraction': 0,
+              'wait': round(wait, 2),
+              'srcmixdepth': m + options['mixdepthsrc'],
+              'makercount': makercount,
+              'destination': 'INTERNAL-SAME-MIXDEPTH'
+        }
+        tx_list.append(tx)
+
+    ### stage 2 coinjoins, which create a number of random-amount coinjoins from each mixdepth
     for m, txcount in enumerate(txcounts):
         if options['mixdepthcount'] - options['addrcount'] <= m and m < \
                 options['mixdepthcount'] - 1:

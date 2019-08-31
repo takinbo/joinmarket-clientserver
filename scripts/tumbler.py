@@ -77,7 +77,8 @@ def main():
                     "important")
             if input("OK? (y/n)") != "y":
                 sys.exit(0)
-        destaddrs = [s[3] for s in schedule if s[3] not in ["INTERNAL", "addrask"]]
+        destaddrs = [s[3] for s in schedule if s[3] not in ["INTERNAL",
+            "INTERNAL-SAME-MIXDEPTH", "addrask"]]
         jmprint("Remaining destination addresses in restart: " + ",".join(destaddrs),
                 "important")
         if isinstance(schedule[0][5], str) and len(schedule[0][5]) == 64:

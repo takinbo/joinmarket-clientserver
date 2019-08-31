@@ -566,7 +566,8 @@ class SpendTab(QWidget):
                 s for s in self.spendstate.loaded_schedule if s[5] != 1]
             #reload destination addresses
             self.tumbler_destaddrs = [x[3] for x in self.spendstate.loaded_schedule
-                                     if x not in ["INTERNAL", "addrask"]]
+                                     if x not in ["INTERNAL", "INTERNAL-SAME-MIXDEPTH",
+                                     "addrask"]]
             #2 Check for unconfirmed
             if isinstance(self.spendstate.loaded_schedule[0][5], str) and len(
                 self.spendstate.loaded_schedule[0][5]) == 64:
